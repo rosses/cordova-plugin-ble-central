@@ -49,6 +49,30 @@ function convertToNativeJS(object) {
 
 module.exports = {
 
+
+    buscarGascheck: function(success, failure) {
+        
+        var successWrapper = function(peripheral) {
+            convertToNativeJS(peripheral);
+            var res = {
+                readStatus: 0,
+                msg: '',
+                level: 0
+            };
+
+            // si rawLevel = 255 entonce esta al 100%
+            // 
+            ///success(peripheral);
+            success(res);
+        };
+        var options = { // Todos los dispositivos
+            reportDuplicates: true
+        };
+        var services = []; // Todos los servicios
+
+        cordova.exec(successWrapper, failure, 'BLE', 'startScanWithOptions', [services, options]);
+    },
+
     scan: function (services, seconds, success, failure) {
         var successWrapper = function(peripheral) {
             convertToNativeJS(peripheral);
