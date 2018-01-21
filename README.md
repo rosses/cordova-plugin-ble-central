@@ -32,10 +32,10 @@ Puede realizarlo mediante la declaración de variable
 
 En [PhoneGap Build](http://build.phonegap.com)
 
-    $   <plugin spec="https://github.com/rosses/cordova-plugin-ble-central.git" source="git">
-    $     <param name="BLUETOOTH_USAGE_DESCRIPTION" value="Esta app necesita acceso a tu bluetooth" />
-    $     <variable name="BLUETOOTH_USAGE_DESCRIPTION" value="Esta app necesita acceso a tu bluetooth" />
-    $   </plugin>
+    <plugin spec="https://github.com/rosses/cordova-plugin-ble-central.git" source="git">
+      <param name="BLUETOOTH_USAGE_DESCRIPTION" value="Esta app necesita acceso a tu bluetooth" />
+      <variable name="BLUETOOTH_USAGE_DESCRIPTION" value="Esta app necesita acceso a tu bluetooth" />
+    </plugin>
 
 
 # Feedback

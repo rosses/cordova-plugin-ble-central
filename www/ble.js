@@ -35,6 +35,28 @@ function massageMessageNativeToJs(message) {
     return message;
 }
 
+function GLPin(input) {
+    return input * 1000000 * 0.015 + 0.5;
+}
+function GLPmt(input) {
+    return GLPin(input) / 39.3701;
+}
+function GLPStars(input) {
+    if (parseInt(input) <= 5) {return 0;}
+    else if (parseInt(input) > 5 && parseInt(input) <= 15) {return 1;}
+    else if (parseInt(input) > 15 && parseInt(input) <= 30) {return 2;}
+    else if (parseInt(input) > 30) { return 3; }
+}
+function batteryPorcentage(input) {
+    var c = (input - 2.2) / 0.65 * 100;
+    if (c > 100) { c = 100; }
+    else if (c < 0) { c = 0; }
+    return c;
+}
+function batteryVoltage(input) {
+    return input / 256.0 * 2.0 + 1.5;
+}
+
 // Cordova 3.6 doesn't unwrap ArrayBuffers in nested data structures
 // https://github.com/apache/cordova-js/blob/94291706945c42fd47fa632ed30f5eb811080e95/src/ios/exec.js#L107-L122
 function convertToNativeJS(object) {
@@ -50,20 +72,71 @@ function convertToNativeJS(object) {
 module.exports = {
 
 
-    buscarGascheck: function(success, failure) {
+    listenGascheck: function(success, failure) {
         
         var successWrapper = function(peripheral) {
             convertToNativeJS(peripheral);
             var res = {
-                readStatus: 0,
-                msg: '',
-                level: 0
+                level: 0,
+                height: 0,
+                trust: 0,
+                batteryLeft: 0
             };
 
-            // si rawLevel = 255 entonce esta al 100%
-            // 
-            ///success(peripheral);
-            success(res);
+            console.log("peripheral", peripheral);
+            console.log("typeof peripheral.advertising", typeof peripheral.advertising);
+            if (peripheral.advertising) {
+                if (typeof peripheral.advertising == "object") {
+                    //android
+                    var adData = new Uint8Array(device.advertising);
+                    console.log(adData);
+                    if (adData[0] == 26) { // manufacturer 
+                        var u8 = adData.slice(2, 2 + 25);
+                        var base64 = btoa(String.fromCharCode.apply(null, u8));
+
+                        x = {
+                            bdaddr: peripheral.id,
+                            manufacturerData: base64
+                        };
+
+                        var xmlhttp = new XMLHttpRequest();
+                        xmlhttp.open("POST", "https://dpt4jyt0x5.execute-api.sa-east-1.amazonaws.com/v1/calculate_tc_sensor_level");
+                        xmlhttp.setRequestHeader("Content-Type", "application/json");
+                        xmlhttp.setRequestHeader("X-Api-Key", "q0T2CnyBHH4OfPXeUZmVjaUSdyN84ot48ZoYF2h4");
+                        xmlhttp.send(JSON.stringify(x));
+
+                        xmlhttp.onreadystatechange = function (oEvent) {  
+                            if (xmlhttp.readyState === 4) {  
+                                if (xmlhttp.status === 200) {  
+                                    console.log("Success API", xmlhttp.responseText);
+                                    
+                                    var resJson = JSON.parse(xmlhttp.responseText);
+                                    res.level = resJSON.rawLevel;
+                                    res.trust = parseInt(GLPStars(resJSON.quality));
+                                    res.height = parseFloat(GLPmt(resJSON.lpgLevel));
+                                    res.batteryLeft = parseInt(batteryPorcentage(resJSON.voltage));
+
+                                    success(res);
+
+                                } else {  
+                                    console.log("Error", xmlhttp.statusText);
+                                    failure(xmlhttp.statusText);
+                                }
+
+                            }  
+                        };
+
+                        xhr.ontimeout = function (e) {
+                          failure("API Timeout");
+                        };
+                    }
+                }
+                else {
+                    //ios
+                    console.log('iOS - GasCheck detected');
+                    console.log(peripheral);
+                }
+            }
         };
         var options = { // Todos los dispositivos
             reportDuplicates: true
