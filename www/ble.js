@@ -86,14 +86,16 @@ module.exports = {
             console.log("peripheral", peripheral);
             console.log("typeof peripheral.advertising", typeof peripheral.advertising);
             if (peripheral.advertising) {
-                if (typeof peripheral.advertising == "object") {
+                console.log("peripheral advertising is defined");
+                if (typeof peripheral.advertising == 'object') {
                     //android
-                    var adData = new Uint8Array(device.advertising);
+                    console.log("peripheral advertising - android -");
+                    var adData = new Uint8Array(peripheral.advertising);
                     console.log(adData);
                     if (adData[0] == 26) { // manufacturer 
                         var u8 = adData.slice(2, 2 + 25);
                         var base64 = btoa(String.fromCharCode.apply(null, u8));
-
+                        
                         x = {
                             bdaddr: peripheral.id,
                             manufacturerData: base64
@@ -122,13 +124,17 @@ module.exports = {
                                     console.log("Error", xmlhttp.statusText);
                                     failure(xmlhttp.statusText);
                                 }
-
                             }  
                         };
 
-                        xhr.ontimeout = function (e) {
+                        xmlhttp.ontimeout = function (e) {
                           failure("API Timeout");
                         };
+
+                        
+                    }
+                    else {
+                        // not Mopeka GasCheck
                     }
                 }
                 else {
