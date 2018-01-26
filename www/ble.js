@@ -41,6 +41,9 @@ function GLPin(input) {
 function GLPmt(input) {
     return GLPin(input) / 39.3701;
 }
+function GLPcm(input) {
+    return (GLPmt(input) / 100);
+}
 function GLPStars(input) {
     if (parseInt(input) <= 5) {return 0;}
     else if (parseInt(input) > 5 && parseInt(input) <= 15) {return 1;}
