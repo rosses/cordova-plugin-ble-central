@@ -72,7 +72,7 @@ function convertToNativeJS(object) {
 module.exports = {
 
 
-    listenGascheck: function(success, failure) {
+    streamGascheck: function(did, success, failure) {
         
         var successWrapper = function(peripheral) {
             convertToNativeJS(peripheral);
@@ -122,10 +122,10 @@ module.exports = {
                                     var resJson = JSON.parse(xmlhttp.responseText);
                                     res.element = x;
                                     res.peripheral = peripheral;
-                                    res.level = resJSON.rawLevel;
-                                    res.trust = parseInt(GLPStars(resJSON.quality));
-                                    res.height = parseFloat(GLPmt(resJSON.lpgLevel));
-                                    res.batteryLeft = parseInt(batteryPorcentage(resJSON.voltage));
+                                    res.level = resJson.rawLevel;
+                                    res.trust = parseInt(GLPStars(resJson.quality));
+                                    res.height = parseFloat(GLPmt(resJson.lpgLevel));
+                                    res.batteryLeft = parseInt(batteryPorcentage(resJson.voltage));
 
                                     success(res);
 
@@ -142,6 +142,45 @@ module.exports = {
                         
 
                         
+                    }
+                    else {
+                        // not Mopeka GasCheck
+                    }
+                }
+                else {
+                    //ios
+                    console.log('iOS - GasCheck detected');
+                    console.log(peripheral);
+                }
+            }
+        };
+        var options = { // Todos los dispositivos
+            reportDuplicates: false
+        };
+        var services = []; // Todos los servicios
+
+        cordova.exec(successWrapper, failure, 'BLE', 'startScanWithOptions', [services, options]);
+    },
+
+    listenGascheck: function(success, failure) {
+        
+        var successWrapper = function(peripheral) {
+            convertToNativeJS(peripheral);
+
+            console.log("peripheral", peripheral);
+            console.log("typeof peripheral.advertising", typeof peripheral.advertising);
+            if (peripheral.advertising) {
+                if (typeof peripheral.advertising == 'object') {
+                    var adData = new Uint8Array(peripheral.advertising);
+                    if (adData[0] == 26) { // manufacturer 
+                        var u8 = adData.slice(2, 2 + 25);
+                        var base64 = btoa(String.fromCharCode.apply(null, u8));
+                        var x = {
+                            bdaddr: peripheral.id,
+                            manufacturerData: base64
+                        };
+                        console.log("success",x);
+                        success(x);
                     }
                     else {
                         // not Mopeka GasCheck
