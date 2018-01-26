@@ -77,7 +77,7 @@ module.exports = {
 
     streamGascheck: function(did, success, failure) {
         
-        var successWrapper = function(peripheral) {
+        var successWrapperx = function(peripheral) {
             convertToNativeJS(peripheral);
             var res = {
                 element: {},
@@ -162,12 +162,12 @@ module.exports = {
         };
         var services = []; // Todos los servicios
 
-        cordova.exec(successWrapper, failure, 'BLE', 'startScanWithOptions', [services, options]);
+        cordova.exec(successWrapperx, failure, 'BLE', 'startScanWithOptions', [services, options]);
     },
 
     listenGascheck: function(success, failure) {
         
-        var successWrapper = function(peripheral) {
+        var successWrapperListing = function(peripheral) {
             convertToNativeJS(peripheral);
 
             console.log("peripheral", peripheral);
@@ -201,13 +201,22 @@ module.exports = {
                     console.log(peripheral);
                 }
             }
+            else {
+                // not advertising
+                var x = {
+                    isValid: 0,
+                    bdaddr: peripheral.id,
+                    manufacturerData: ''
+                };
+                success(x);
+            }
         };
         var options = { // Todos los dispositivos
             reportDuplicates: false
         };
         var services = []; // Todos los servicios
 
-        cordova.exec(successWrapper, failure, 'BLE', 'startScanWithOptions', [services, options]);
+        cordova.exec(successWrapperListing, failure, 'BLE', 'startScanWithOptions', [services, options]);
     },
 
     scan: function (services, seconds, success, failure) {
