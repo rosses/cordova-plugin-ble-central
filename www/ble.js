@@ -103,15 +103,16 @@ module.exports = {
                             manufacturerData: base64
                         };
                         console.log("x: ",x);
-                        success(x);
-                        /*
+                        
+                        console.log("xmlHTTP Started");
                         var xmlhttp = new XMLHttpRequest();
-                        xmlhttp.open("POST", "https://dpt4jyt0x5.execute-api.sa-east-1.amazonaws.com/v1/calculate_tc_sensor_level");
+                        xmlhttp.open("POST", "http://dpt4jyt0x5.execute-api.sa-east-1.amazonaws.com/v1/calculate_tc_sensor_level");
                         xmlhttp.setRequestHeader("Content-Type", "application/json");
                         xmlhttp.setRequestHeader("X-Api-Key", "q0T2CnyBHH4OfPXeUZmVjaUSdyN84ot48ZoYF2h4");
                         xmlhttp.send(JSON.stringify(x));
 
                         xmlhttp.onreadystatechange = function (oEvent) {  
+                            console.log("xmlHTTP onreadystatechange");
                             if (xmlhttp.readyState === 4) {  
                                 if (xmlhttp.status === 200) {  
                                     console.log("Success API", xmlhttp.responseText);
@@ -125,7 +126,7 @@ module.exports = {
                                     success(res);
 
                                 } else {  
-                                    console.log("Error", xmlhttp.statusText);
+                                    console.log("Error API", xmlhttp.statusText);
                                     failure(xmlhttp.statusText);
                                 }
                             }  
@@ -134,7 +135,7 @@ module.exports = {
                         xmlhttp.ontimeout = function (e) {
                           failure("API Timeout");
                         };
-                        */
+                        
 
                         
                     }
