@@ -167,6 +167,8 @@ module.exports = {
 
     listenGascheck: function(success, failure) {
         
+        var parent = this;
+
         var successWrapperListing = function(peripheral) {
             convertToNativeJS(peripheral);
 
@@ -183,7 +185,7 @@ module.exports = {
                             bdaddr: peripheral.id,
                             manufacturerData: base64
                         };
-                        success(x);
+                        parent.success(x);
                     }
                     else {
                         // not Mopeka GasCheck
@@ -192,7 +194,7 @@ module.exports = {
                             bdaddr: peripheral.id,
                             manufacturerData: ''
                         };
-                        success(x);
+                        parent.success(x);
                     }
                 }
                 else {
@@ -208,7 +210,7 @@ module.exports = {
                     bdaddr: peripheral.id,
                     manufacturerData: ''
                 };
-                success(x);
+                parent.success(x);
             }
         };
         var options = { // Todos los dispositivos
