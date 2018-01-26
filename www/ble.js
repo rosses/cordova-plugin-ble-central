@@ -179,14 +179,20 @@ module.exports = {
                         var u8 = adData.slice(2, 2 + 25);
                         var base64 = btoa(String.fromCharCode.apply(null, u8));
                         var x = {
+                            isValid: 1,
                             bdaddr: peripheral.id,
                             manufacturerData: base64
                         };
-                        console.log("success",x);
                         success(x);
                     }
                     else {
                         // not Mopeka GasCheck
+                        var x = {
+                            isValid: 0,
+                            bdaddr: peripheral.id,
+                            manufacturerData: ''
+                        };
+                        success(x);
                     }
                 }
                 else {
