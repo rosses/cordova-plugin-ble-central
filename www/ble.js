@@ -118,6 +118,7 @@ module.exports = {
                                     console.log("Success API", xmlhttp.responseText);
                                     
                                     var resJson = JSON.parse(xmlhttp.responseText);
+                                    res.element = x;
                                     res.level = resJSON.rawLevel;
                                     res.trust = parseInt(GLPStars(resJSON.quality));
                                     res.height = parseFloat(GLPmt(resJSON.lpgLevel));
