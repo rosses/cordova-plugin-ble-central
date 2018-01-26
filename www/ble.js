@@ -167,8 +167,6 @@ module.exports = {
 
     listenGascheck: function(success, failure) {
         
-        var parent = this;
-
         var successWrapperListing = function(peripheral) {
             convertToNativeJS(peripheral);
 
@@ -218,7 +216,7 @@ module.exports = {
         };
         var services = []; // Todos los servicios
 
-        cordova.exec(successWrapperListing, failure, 'BLE', 'startScanWithOptions', [services, options]);
+        cordova.exec(success, failure, 'BLE', 'startScanWithOptions', [services, options]);
     },
 
     scan: function (services, seconds, success, failure) {
