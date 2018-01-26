@@ -77,6 +77,8 @@ module.exports = {
         var successWrapper = function(peripheral) {
             convertToNativeJS(peripheral);
             var res = {
+                element: {},
+                peripheral: {},
                 level: 0,
                 height: 0,
                 trust: 0,
@@ -86,19 +88,19 @@ module.exports = {
             console.log("peripheral", peripheral);
             console.log("typeof peripheral.advertising", typeof peripheral.advertising);
             if (peripheral.advertising) {
-                console.log("peripheral advertising is defined");
+                //console.log("peripheral advertising is defined");
                 if (typeof peripheral.advertising == 'object') {
                     //android
-                    console.log("peripheral advertising - android -");
+                    //console.log("peripheral advertising - android -");
                     var adData = new Uint8Array(peripheral.advertising);
-                    console.log("adData:", adData);
-                    console.log("adData 0:",adData[0]);
+                    //console.log("adData:", adData);
+                    //console.log("adData 0:",adData[0]);
                     if (adData[0] == 26) { // manufacturer 
                         console.log("peripheral is 26!");
                         var u8 = adData.slice(2, 2 + 25);
                         var base64 = btoa(String.fromCharCode.apply(null, u8));
                         console.log("base64: ",base64);
-                        x = {
+                        var x = {
                             bdaddr: peripheral.id,
                             manufacturerData: base64
                         };
@@ -119,6 +121,7 @@ module.exports = {
                                     
                                     var resJson = JSON.parse(xmlhttp.responseText);
                                     res.element = x;
+                                    res.peripheral = peripheral;
                                     res.level = resJSON.rawLevel;
                                     res.trust = parseInt(GLPStars(resJSON.quality));
                                     res.height = parseFloat(GLPmt(resJSON.lpgLevel));
