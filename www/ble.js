@@ -91,16 +91,20 @@ module.exports = {
                     //android
                     console.log("peripheral advertising - android -");
                     var adData = new Uint8Array(peripheral.advertising);
-                    console.log(adData);
+                    console.log("adData:", adData);
+                    console.log("adData 0:",adData[0]);
                     if (adData[0] == 26) { // manufacturer 
+                        console.log("peripheral is 26!");
                         var u8 = adData.slice(2, 2 + 25);
                         var base64 = btoa(String.fromCharCode.apply(null, u8));
-                        
+                        console.log("base64: ",base64);
                         x = {
                             bdaddr: peripheral.id,
                             manufacturerData: base64
                         };
-
+                        console.log("x: ",x);
+                        success(x);
+                        /*
                         var xmlhttp = new XMLHttpRequest();
                         xmlhttp.open("POST", "https://dpt4jyt0x5.execute-api.sa-east-1.amazonaws.com/v1/calculate_tc_sensor_level");
                         xmlhttp.setRequestHeader("Content-Type", "application/json");
@@ -130,6 +134,7 @@ module.exports = {
                         xmlhttp.ontimeout = function (e) {
                           failure("API Timeout");
                         };
+                        */
 
                         
                     }
@@ -145,7 +150,7 @@ module.exports = {
             }
         };
         var options = { // Todos los dispositivos
-            reportDuplicates: true
+            reportDuplicates: false
         };
         var services = []; // Todos los servicios
 
