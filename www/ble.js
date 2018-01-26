@@ -35,31 +35,6 @@ function massageMessageNativeToJs(message) {
     return message;
 }
 
-function GLPin(input) {
-    return input * 1000000 * 0.015 + 0.5;
-}
-function GLPmt(input) {
-    return GLPin(input) / 39.3701;
-}
-function GLPcm(input) {
-    return (GLPmt(input) / 100);
-}
-function GLPStars(input) {
-    if (parseInt(input) <= 5) {return 0;}
-    else if (parseInt(input) > 5 && parseInt(input) <= 15) {return 1;}
-    else if (parseInt(input) > 15 && parseInt(input) <= 30) {return 2;}
-    else if (parseInt(input) > 30) { return 3; }
-}
-function batteryPorcentage(input) {
-    var c = (input - 2.2) / 0.65 * 100;
-    if (c > 100) { c = 100; }
-    else if (c < 0) { c = 0; }
-    return c;
-}
-function batteryVoltage(input) {
-    return input / 256.0 * 2.0 + 1.5;
-}
-
 // Cordova 3.6 doesn't unwrap ArrayBuffers in nested data structures
 // https://github.com/apache/cordova-js/blob/94291706945c42fd47fa632ed30f5eb811080e95/src/ios/exec.js#L107-L122
 function convertToNativeJS(object) {
@@ -73,151 +48,6 @@ function convertToNativeJS(object) {
 }
 
 module.exports = {
-
-
-    streamGascheck: function(did, success, failure) {
-        
-        var successWrapperx = function(peripheral) {
-            convertToNativeJS(peripheral);
-            var res = {
-                element: {},
-                peripheral: {},
-                level: 0,
-                height: 0,
-                trust: 0,
-                batteryLeft: 0
-            };
-
-            console.log("peripheral", peripheral);
-            console.log("typeof peripheral.advertising", typeof peripheral.advertising);
-            if (peripheral.advertising) {
-                //console.log("peripheral advertising is defined");
-                if (typeof peripheral.advertising == 'object') {
-                    //android
-                    //console.log("peripheral advertising - android -");
-                    var adData = new Uint8Array(peripheral.advertising);
-                    //console.log("adData:", adData);
-                    //console.log("adData 0:",adData[0]);
-                    if (adData[0] == 26) { // manufacturer 
-                        console.log("peripheral is 26!");
-                        var u8 = adData.slice(2, 2 + 25);
-                        var base64 = btoa(String.fromCharCode.apply(null, u8));
-                        console.log("base64: ",base64);
-                        var x = {
-                            bdaddr: peripheral.id,
-                            manufacturerData: base64
-                        };
-                        console.log("x: ",x);
-                        
-                        console.log("xmlHTTP Started");
-                        var xmlhttp = new XMLHttpRequest();
-                        xmlhttp.open("POST", "http://dpt4jyt0x5.execute-api.sa-east-1.amazonaws.com/v1/calculate_tc_sensor_level");
-                        xmlhttp.setRequestHeader("Content-Type", "application/json");
-                        xmlhttp.setRequestHeader("X-Api-Key", "q0T2CnyBHH4OfPXeUZmVjaUSdyN84ot48ZoYF2h4");
-                        xmlhttp.send(JSON.stringify(x));
-
-                        xmlhttp.onreadystatechange = function (oEvent) {  
-                            console.log("xmlHTTP onreadystatechange");
-                            if (xmlhttp.readyState === 4) {  
-                                if (xmlhttp.status === 200) {  
-                                    console.log("Success API", xmlhttp.responseText);
-                                    
-                                    var resJson = JSON.parse(xmlhttp.responseText);
-                                    res.element = x;
-                                    res.peripheral = peripheral;
-                                    res.level = resJson.rawLevel;
-                                    res.trust = parseInt(GLPStars(resJson.quality));
-                                    res.height = parseFloat(GLPmt(resJson.lpgLevel));
-                                    res.batteryLeft = parseInt(batteryPorcentage(resJson.voltage));
-
-                                    success(res);
-
-                                } else {  
-                                    console.log("Error API", xmlhttp.statusText);
-                                    failure(xmlhttp.statusText);
-                                }
-                            }  
-                        };
-
-                        xmlhttp.ontimeout = function (e) {
-                          failure("API Timeout");
-                        };
-                        
-
-                        
-                    }
-                    else {
-                        // not Mopeka GasCheck
-                    }
-                }
-                else {
-                    //ios
-                    console.log('iOS - GasCheck detected');
-                    console.log(peripheral);
-                }
-            }
-        };
-        var options = { // Todos los dispositivos
-            reportDuplicates: false
-        };
-        var services = []; // Todos los servicios
-
-        cordova.exec(successWrapperx, failure, 'BLE', 'startScanWithOptions', [services, options]);
-    },
-
-    listenGascheck: function(success, failure) {
-        
-        var successWrapperListing = function(peripheral) {
-            convertToNativeJS(peripheral);
-
-            console.log("peripheral", peripheral);
-            console.log("typeof peripheral.advertising", typeof peripheral.advertising);
-            if (peripheral.advertising) {
-                if (typeof peripheral.advertising == 'object') {
-                    var adData = new Uint8Array(peripheral.advertising);
-                    if (adData[0] == 26) { // manufacturer 
-                        var u8 = adData.slice(2, 2 + 25);
-                        var base64 = btoa(String.fromCharCode.apply(null, u8));
-                        var x = {
-                            isValid: 1,
-                            bdaddr: peripheral.id,
-                            manufacturerData: base64
-                        };
-                        parent.success(x);
-                    }
-                    else {
-                        // not Mopeka GasCheck
-                        var x = {
-                            isValid: 0,
-                            bdaddr: peripheral.id,
-                            manufacturerData: ''
-                        };
-                        parent.success(x);
-                    }
-                }
-                else {
-                    //ios
-                    console.log('iOS - GasCheck detected');
-                    console.log(peripheral);
-                }
-            }
-            else {
-                // not advertising
-                var x = {
-                    isValid: 0,
-                    bdaddr: peripheral.id,
-                    manufacturerData: ''
-                };
-                parent.success(x);
-            }
-        };
-        var options = { // Todos los dispositivos
-            reportDuplicates: false
-        };
-        var services = []; // Todos los servicios
-
-        cordova.exec(success, failure, 'BLE', 'startScanWithOptions', [services, options]);
-    },
 
     scan: function (services, seconds, success, failure) {
         var successWrapper = function(peripheral) {
@@ -239,7 +69,7 @@ module.exports = {
         cordova.exec(success, failure, 'BLE', 'stopScan', []);
     },
 
-    startScanWithOptions: function(services, options, success, failure) {
+    listenGascheck: function(services, options, success, failure) {
         var successWrapper = function(peripheral) {
             convertToNativeJS(peripheral);
             success(peripheral);
